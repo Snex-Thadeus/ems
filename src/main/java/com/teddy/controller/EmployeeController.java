@@ -1,9 +1,12 @@
 package com.teddy.controller;
 
+import com.teddy.login.User;
+import com.teddy.login.UserRepository;
 import com.teddy.model.Employee;
 import com.teddy.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +17,31 @@ import java.util.List;
 public class EmployeeController {
 
     @Autowired
+    private UserRepository repo;
+
+    @Autowired
     private EmployeeService employeeService;
+
+    @GetMapping("/")
+    public String showSignUpForm(Model model){
+        model.addAttribute("user", new User());
+        return "signup_form";
+    }
+
+    @PostMapping("/process_register")
+    public String processRegistration(User user){
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        String encodedPassword = encoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
+        repo.save(user);
+        return "redirect:/login";
+    }
+
 
     // display list of employees
     //@RequestMapping("/")
-    @GetMapping("/")
+    @GetMapping("/listEmployees")
     public String viewHomePage(Model model) {
 //        model.addAttribute("listEmployees", employeeService.getAllEmployees());
 //        return "index";
@@ -37,7 +60,7 @@ public class EmployeeController {
     public String saveEmployee(@ModelAttribute("employee") Employee employee) {
         // save employee to database
         employeeService.saveEmployee(employee);
-        return "redirect:/";
+        return "redirect:/listEmployees";
     }
 
     @GetMapping("/showFormForUpdate/{id}")
@@ -54,7 +77,7 @@ public class EmployeeController {
     public String deleteEmployee(@PathVariable(value = "id") long id) {
         // call delete employee method
         this.employeeService.deleteEmployeeById(id);
-        return "redirect:/";
+        return "redirect:/listEmployees";
     }
 
     @GetMapping("/page/{pageNo}")
