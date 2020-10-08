@@ -1,7 +1,5 @@
 package com.teddy.controller;
 
-import com.teddy.login.User;
-import com.teddy.login.UserRepository;
 import com.teddy.model.Employee;
 import com.teddy.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,32 +14,14 @@ import java.util.List;
 @Controller
 public class EmployeeController {
 
-    @Autowired
-    private UserRepository repo;
 
     @Autowired
     private EmployeeService employeeService;
 
-    @GetMapping("/")
-    public String showSignUpForm(Model model){
-        model.addAttribute("user", new User());
-        return "signup_form";
-    }
-
-    @PostMapping("/process_register")
-    public String processRegistration(User user){
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        String encodedPassword = encoder.encode(user.getPassword());
-        user.setPassword(encodedPassword);
-
-        repo.save(user);
-        return "redirect:/login";
-    }
-
 
     // display list of employees
     //@RequestMapping("/")
-    @GetMapping("/listEmployees")
+    @GetMapping("/")
     public String viewHomePage(Model model) {
 //        model.addAttribute("listEmployees", employeeService.getAllEmployees());
 //        return "index";
@@ -60,7 +40,7 @@ public class EmployeeController {
     public String saveEmployee(@ModelAttribute("employee") Employee employee) {
         // save employee to database
         employeeService.saveEmployee(employee);
-        return "redirect:/listEmployees";
+        return "redirect:/";
     }
 
     @GetMapping("/showFormForUpdate/{id}")
@@ -77,7 +57,7 @@ public class EmployeeController {
     public String deleteEmployee(@PathVariable(value = "id") long id) {
         // call delete employee method
         this.employeeService.deleteEmployeeById(id);
-        return "redirect:/listEmployees";
+        return "redirect:/";
     }
 
     @GetMapping("/page/{pageNo}")
